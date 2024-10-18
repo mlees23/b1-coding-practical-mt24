@@ -142,7 +142,7 @@ class ClosedLoop:
 
 sub = Submarine()
 # Instantiate your controller (depending on your implementation)
-controller = PDController(kp=0.15, kd=0.6)
+controller = PDController(kp=0.06, kd=0.76)
 closed_loop = ClosedLoop(sub, controller)
 mission = Mission.from_csv(os.path.join('data', 'mission.csv'))  # Adjust path to the CSV file
 
