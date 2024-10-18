@@ -91,14 +91,21 @@ class Mission:
 
     @classmethod
     def from_csv(cls, file_path: str) -> 'Mission':
+         # Initialize empty lists to store values from CSV
+        references = []
+        cave_heights = []
+        cave_depths = []
+
+        # Open the CSV file and read its contents
         with open(file_path, mode='r') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                # Assuming CSV has columns: reference, cave_height, cave_depth
-                reference = float(row['reference'])
-                cave_height = float(row['cave_height'])
-                cave_depth = float(row['cave_depth'])
-                return cls(reference, cave_height, cave_depth)
+                # Append the values to the lists
+                references.append(float(row['reference']))  # Convert to float and append to list
+                cave_heights.append(float(row['cave_height']))  # Convert to float and append
+                cave_depths.append(float(row['cave_depth']))  # Convert to float and append
+                # Return an instance of the class with lists as attributes
+                return cls(references, cave_heights, cave_depths)
 
 # Usage example
 if __name__ == "__main__":
