@@ -1,8 +1,15 @@
 from __future__ import annotations
 from dataclasses import dataclass
+import sys
+import os
+# Add the parent directory to sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+print(sys.path) 
 import numpy as np
 import matplotlib.pyplot as plt
-from .terrain import generate_reference_and_limits
+import csv
+from uuv_mission.terrain import generate_reference_and_limits
+
 
 class Submarine:
     def __init__(self):
@@ -73,11 +80,26 @@ class Mission:
         (reference, cave_height, cave_depth) = generate_reference_and_limits(duration, scale)
         return cls(reference, cave_height, cave_depth)
 
-    @classmethod
-    def from_csv(cls, file_name: str):
-        # You are required to implement this method
-        pass
 
+    @classmethod
+    def from_csv(cls, file_path: str) -> 'Mission':
+        with open(file_path, mode='r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                # Assuming your CSV has columns: reference, cave_height, cave_depth
+                reference = float(row['reference'])
+                cave_height = float(row['cave_height'])
+                cave_depth = float(row['cave_depth'])
+                return cls(reference, cave_height, cave_depth)
+
+# Usage example
+if __name__ == "__main__":
+    # Specify the relative path to the CSV file
+    file_path = 'data/mission.csv'  # Updated path to point to the data directory
+    mission_instance = Mission.from_csv(file_path)
+    print(f"Reference: {mission_instance.reference}, Height: {mission_instance.cave_height}, Depth: {mission_instance.cave_depth}")
+
+   
 
 class ClosedLoop:
     def __init__(self, plant: Submarine, controller):
