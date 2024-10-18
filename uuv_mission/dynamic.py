@@ -80,7 +80,7 @@ class Mission:
         self.reference = reference  # Desired height
         self.cave_height = cave_height  
         self.cave_depth = cave_depth  
-        self.controller = PDController(kp=1.0, kd=0.1)  # Initialize PD controller
+        #self.controller = PDController(kp=0.15, kd=0.6)  # Initialize PD controller
 
 
     @classmethod
@@ -105,14 +105,7 @@ class Mission:
                 cave_heights.append(float(row['cave_height']))  # Convert to float and append
                 cave_depths.append(float(row['cave_depth']))  # Convert to float and append
                 # Return an instance of the class with lists as attributes
-                return cls(references, cave_heights, cave_depths)
-
-# Usage example
-#if __name__ == "__main__":
-    # Specify the relative path to the CSV file
-    #file_path = 'data/mission.csv'  # Updated path to point to the data directory
-    #mission_instance = Mission.from_csv(file_path)
-    #print(f"Reference: {mission_instance.reference}, Height: {mission_instance.cave_height}, Depth: {mission_instance.cave_depth}")
+        return cls(references, cave_heights, cave_depths)
 
    
 
@@ -130,13 +123,14 @@ class ClosedLoop:
         positions = np.zeros((T, 2))
         actions = np.zeros(T)
         self.plant.reset_state()
+        
 
         for t in range(T):
             positions[t] = self.plant.get_position()
             # Call your controller here
             current_depth = self.plant.get_depth()
-            control_signal = self.controller.compute_control(mission)
-            actions[t] = control_signal[t]
+            current_reference = mission.reference[t]
+            actions[t] = self.controller.compute_control(current_depth,current_reference)
             self.plant.transition(actions[t], disturbances[t])
 
         return Trajectory(positions)
@@ -148,7 +142,7 @@ class ClosedLoop:
 
 sub = Submarine()
 # Instantiate your controller (depending on your implementation)
-controller = PDController(kp=1.0, kd=0.1)
+controller = PDController(kp=0.15, kd=0.6)
 closed_loop = ClosedLoop(sub, controller)
 mission = Mission.from_csv(os.path.join('data', 'mission.csv'))  # Adjust path to the CSV file
 
