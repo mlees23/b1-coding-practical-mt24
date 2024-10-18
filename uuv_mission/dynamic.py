@@ -108,16 +108,16 @@ class Mission:
                 return cls(references, cave_heights, cave_depths)
 
 # Usage example
-if __name__ == "__main__":
+#if __name__ == "__main__":
     # Specify the relative path to the CSV file
-    file_path = 'data/mission.csv'  # Updated path to point to the data directory
-    mission_instance = Mission.from_csv(file_path)
-    print(f"Reference: {mission_instance.reference}, Height: {mission_instance.cave_height}, Depth: {mission_instance.cave_depth}")
+    #file_path = 'data/mission.csv'  # Updated path to point to the data directory
+    #mission_instance = Mission.from_csv(file_path)
+    #print(f"Reference: {mission_instance.reference}, Height: {mission_instance.cave_height}, Depth: {mission_instance.cave_depth}")
 
    
 
 class ClosedLoop:
-    def __init__(self, plant: Submarine, controller):
+    def __init__(self, plant: Submarine, controller: PDController):
         self.plant = plant
         self.controller = controller
 
@@ -133,10 +133,10 @@ class ClosedLoop:
 
         for t in range(T):
             positions[t] = self.plant.get_position()
-            observation_t = self.plant.get_depth()
             # Call your controller here
-            control_signal = self.controller.compute_control(self.reference, self.cave_height)
-            self.cave_height += control_signal 
+            current_depth = self.plant.get_depth()
+            control_signal = self.controller.compute_control(mission)
+            actions[t] = control_signal[t]
             self.plant.transition(actions[t], disturbances[t])
 
         return Trajectory(positions)
@@ -144,3 +144,14 @@ class ClosedLoop:
     def simulate_with_random_disturbances(self, mission: Mission, variance: float = 0.5) -> Trajectory:
         disturbances = np.random.normal(0, variance, len(mission.reference))
         return self.simulate(mission, disturbances)
+    
+
+sub = Submarine()
+# Instantiate your controller (depending on your implementation)
+controller = PDController(kp=1.0, kd=0.1)
+closed_loop = ClosedLoop(sub, controller)
+mission = Mission.from_csv(os.path.join('data', 'mission.csv'))  # Adjust path to the CSV file
+
+
+trajectory = closed_loop.simulate_with_random_disturbances(mission)
+trajectory.plot_completed_mission(mission)
