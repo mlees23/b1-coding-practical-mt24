@@ -140,12 +140,12 @@ class ClosedLoop:
         return self.simulate(mission, disturbances)
     
 
-sub = Submarine()
+#sub = Submarine()
 # Instantiate your controller (depending on your implementation)
-controller = PDController(kp=0.06, kd=0.76)
-closed_loop = ClosedLoop(sub, controller)
-mission = Mission.from_csv(os.path.join('data', 'mission.csv'))  # Adjust path to the CSV file
+#controller = PDController(kp=0.06, kd=0.76)
+#closed_loop = ClosedLoop(sub, controller)
+#mission = Mission.from_csv(os.path.join('data', 'mission.csv'))  # Adjust path to the CSV file
 
 
-trajectory = closed_loop.simulate_with_random_disturbances(mission)
-trajectory.plot_completed_mission(mission)
+#trajectory = closed_loop.simulate_with_random_disturbances(mission)
+#trajectory.plot_completed_mission(mission)
