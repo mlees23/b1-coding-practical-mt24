@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 from uuv_mission.terrain import generate_reference_and_limits
-
+from uuv_mission.control import PDController 
 
 class Submarine:
     def __init__(self):
@@ -70,10 +70,18 @@ class Trajectory:
         plt.show()
 
 @dataclass
+#class Mission:
+    #reference: np.ndarray
+    #cave_height: np.ndarray
+    #cave_depth: np.ndarray
+
 class Mission:
-    reference: np.ndarray
-    cave_height: np.ndarray
-    cave_depth: np.ndarray
+    def __init__(self, reference: float, cave_height: float, cave_depth: float):
+        self.reference = reference  # Desired height
+        self.cave_height = cave_height  
+        self.cave_depth = cave_depth  
+        self.controller = PDController(kp=1.0, kd=0.1)  # Initialize PD controller
+
 
     @classmethod
     def random_mission(cls, duration: int, scale: float):
@@ -86,7 +94,7 @@ class Mission:
         with open(file_path, mode='r') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                # Assuming your CSV has columns: reference, cave_height, cave_depth
+                # Assuming CSV has columns: reference, cave_height, cave_depth
                 reference = float(row['reference'])
                 cave_height = float(row['cave_height'])
                 cave_depth = float(row['cave_depth'])
@@ -120,6 +128,8 @@ class ClosedLoop:
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
             # Call your controller here
+            control_signal = self.controller.compute_control(self.reference, self.cave_height)
+            self.cave_height += control_signal 
             self.plant.transition(actions[t], disturbances[t])
 
         return Trajectory(positions)
